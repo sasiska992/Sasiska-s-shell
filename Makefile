@@ -1,18 +1,26 @@
-#Makefile
-#SRC=main.cpp
-#SRC=shell.cpp
-SRC=test.cpp
-TARGET=soot
-LIBS=-lreadline
-PATH_TO_PACKAGE=package/usr/bin/
+# Определите переменные
+SRC = test.cpp
+TARGET = soot
+LIBS = -lreadline
+PACKAGE_NAME = sasiska_shell
+PATH_TO_PACKAGE = $(PACKAGE_NAME)/usr/local/bin/
+
+
+# Правило по умолчанию
 all: run
 
-$(TARGET): $(SRC)
-	g++ -g $(SRC) -o $(PATH_TO_PACKAGE)$(TARGET) -o $@ $(LIBS)
+# Правило для сборки
+$(PATH_TO_PACKAGE)$(TARGET): $(SRC)
+	mkdir -p $(PATH_TO_PACKAGE)
+	g++ -g $(SRC) -o $(PATH_TO_PACKAGE)$(TARGET) $(LIBS)
 
-run: $(TARGET)
-	./$(TARGET)
+# Правило для запуска
+run: $(PATH_TO_PACKAGE)$(TARGET)
+	./$(PATH_TO_PACKAGE)$(TARGET)
 
-
+# Правило для очистки
 clean:
-	rm -rf $(TARGET)
+	rm -rf $(PATH_TO_PACKAGE)$(TARGET)
+
+create_package:
+	dpkg-deb --build $(PACKAGE_NAME)
