@@ -6,6 +6,7 @@
 bash_history.txt
 soot
 package/usr/local/bin/soot
+CMakeLists.txt
 
 # User-specific stuff
 .idea/**/workspace.xml
