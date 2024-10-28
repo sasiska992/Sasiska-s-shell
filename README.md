@@ -1,4 +1,4 @@
-## How to create package
+## How to create deb package
 ```bash
 make create_package
 ```
