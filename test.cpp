@@ -24,6 +24,7 @@ enum Command {
     EXPORT,
     ENV,
     DISK,
+    GET_ALL_PARTITIONS,
     UNKNOWN
 };
 
@@ -97,6 +98,7 @@ Command getCommand(const string &input) {
     if (input.substr(0, 6) == "export") return EXPORT;
     if (input[0] == '$') return ENV;
     if (input == "disk") return DISK;
+    if (input == "partitions") return GET_ALL_PARTITIONS;
     return UNKNOWN;
 }
 
@@ -208,6 +210,9 @@ int main() {
                     break;
                 case DISK:
                     cout << get_disk_info();
+                    break;
+                case GET_ALL_PARTITIONS:
+                    cout << exec("sudo fdisk -l");
                     break;
                 case UNKNOWN:
                 default:
