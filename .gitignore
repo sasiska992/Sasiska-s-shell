@@ -5,8 +5,10 @@
 .bash_history.txt
 bash_history.txt
 soot
-package/usr/local/bin/soot
+sasiska_shell/usr/local/bin/soot
 CMakeLists.txt
+
+packages
 
 # User-specific stuff
 .idea/**/workspace.xml

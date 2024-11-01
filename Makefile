@@ -24,3 +24,5 @@ clean:
 
 create_package:
 	dpkg-deb --build $(PACKAGE_NAME)
+	mkdir -p packages
+	mv $(PACKAGE_NAME).deb packages
