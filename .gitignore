@@ -8,6 +8,7 @@ soot
 sasiska_shell/usr/local/bin/soot
 CMakeLists.txt
 
+.cronfs
 packages
 
 # User-specific stuff

@@ -1,5 +1,5 @@
 # Определите переменные
-SRC = test.cpp
+SRC = shell.cpp
 TARGET = soot
 LIBS = -lreadline
 PACKAGE_NAME = sasiska_shell

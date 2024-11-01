@@ -1,15 +1,17 @@
 #include <iostream>
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>  // Необходим для std::istringstream
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <csignal>
 #include <cstdlib>
 #include <cstdio>
 #include <memory>
-
+#include <vector>
 #include <array>
 #include <sys/wait.h>
-#include "string"
-
 
 
 using namespace std;
@@ -25,7 +27,9 @@ enum Command {
     ENV,
     DISK,
     GET_ALL_PARTITIONS,
-    UNKNOWN
+    UNKNOWN,
+    CRON_TAB,
+    UMOUNT_CRON,
 };
 
 struct Colors {
@@ -53,6 +57,18 @@ string exec(const string cmd) {
     return result; // Возвращаем результат
 }
 
+
+vector <string> split(const string &str, char delimiter) {
+    vector <string> tokens;
+    istringstream tokenStream(str);
+    string token;
+
+    while (getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+
+    return tokens;
+}
 
 // Обработчик сигнала
 void handle_signal(int signal) {
@@ -89,7 +105,7 @@ string get_echo(const string &input_echo_text) {
 }
 
 Command getCommand(const string &input) {
-    if (input == "exit") return EXIT;
+    if (input == "exit" || input == "q") return EXIT;
     if (check_echo(input)) return ECHO;
     if (input.substr(0, 2) == "ls") return LS;
     if (input.substr(0, 2) == "cd") return CD;
@@ -99,6 +115,8 @@ Command getCommand(const string &input) {
     if (input[0] == '$') return ENV;
     if (input == "disk") return DISK;
     if (input == "partitions") return GET_ALL_PARTITIONS;
+    if (input == "cron_tab") return CRON_TAB;
+    if (input == "umount_cron") return UMOUNT_CRON;
     return UNKNOWN;
 }
 
@@ -141,6 +159,54 @@ string get_disk_info() {
     } else {
         return "Unknown\n";
     }
+}
+
+void create_cron_vfs() {
+    string crontab_info = exec("crontab -l");
+    vector <string> cron_commands = split(crontab_info, '\n');
+    cout << "Starting mount" << endl;
+    usleep(500000);
+    cout << "Mounting completed by 30%" << endl;
+    usleep(500000);
+    exec("mkdir -p .cronfs");
+    cout << "Mounting completed by 70%" << endl;
+    usleep(500000);
+    exec("sudo mount -t tmpfs tmpfs .cronfs");
+    cout << "Mounting completed by 90%" << endl;
+    usleep(500000);
+    for (string i: cron_commands) {
+        if (i.length() != 0) {
+            string file_name = i.substr(10, i.length() - 1);
+
+            ofstream outfile(".cronfs/" + file_name);
+
+            outfile << i.substr(0, 10) << std::endl;
+
+            outfile.close();
+            cout << "Create file " + file_name << endl;
+            usleep(300000);
+//            cout << file_name << endl;
+        }
+    }
+    cout << "Mounting completed by 100%" << endl;
+    usleep(500000);
+    cout << "Mounting is done!" << endl;
+}
+
+void umount_cron_vfs() {
+    cout << "Starting umount" << endl;
+    usleep(500000);
+    cout << "Umounting completed by 30%" << endl;
+    exec("sudo umount .cronfs");
+    usleep(300000);
+    cout << colors.YELLOW << ".cronfs was unmouned!" << colors.RESET << endl;
+    usleep(500000);
+    cout << "Umounting completed by 60%" << endl;
+    exec("rm -rf .cronfs");
+    usleep(500000);
+    cout << ".cronfs was deleted!" << endl;
+    usleep(500000);
+    cout << "Umounting completed by 100%" << endl;
 }
 
 int main() {
@@ -214,11 +280,20 @@ int main() {
                 case GET_ALL_PARTITIONS:
                     cout << exec("sudo fdisk -l");
                     break;
+                case CRON_TAB:
+                    create_cron_vfs();
+                    break;
+                case UMOUNT_CRON:
+                    umount_cron_vfs();
+                    break;
                 case UNKNOWN:
                 default:
                     string result = exec(input);
-                    if (result == "sh: 1: " + input + ": not found\n") {
+                    // 
+                    if (result == "sh: 1:" + input + ": not found") {
                         cout << colors.RED << "Unknown command " + input + ". Try again" << colors.RESET << endl;
+                    } else {
+                        cout << result << endl;
                     }
                     break;
             }
@@ -226,6 +301,7 @@ int main() {
             cout << "Please enter some command -_-" << endl;
         }
         input.clear();// Освобождаем память
+        write_history(input.c_str());
     }
 
 
