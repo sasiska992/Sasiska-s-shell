@@ -67,12 +67,18 @@ vector<string> split(const string &str, char delimiter) {
     return tokens;
 }
 
+volatile sig_atomic_t sighup_flag = 0;
+
 // Обработчик сигнала
 void handle_signal(int signal) {
     if (signal == SIGINT) {
         cout << "\nЗавершение программы..." << endl;
         write_history(history_file); // Сохраняем историю перед выходом
         exit(0);                     // Завершаем программу
+    }
+    if (signal == SIGHUP) {
+        sighup_flag = 1;
+        cout << "Reload config ... \n" << endl;
     }
 }
 
@@ -223,6 +229,7 @@ void umount_cron_vfs() {
 int main() {
     string path = exec("pwd");
     signal(SIGINT, handle_signal);
+    signal(SIGHUP, handle_signal);
     // Загружаем историю из файла, если он существует
     read_history(history_file);
 
@@ -237,9 +244,14 @@ int main() {
         path = temp_path;
         // Проверка на EOF (Ctrl+D)
         if (line == nullptr) {
-            cout << colors.YELLOW
-                 << "\nSee you next time! I`m going to sleep\n";
-            exit(0);
+            if (sighup_flag == 1) {
+                sighup_flag = 0;
+                continue;
+            } else {
+                cout << colors.YELLOW
+                     << "\nSee you next time! I`m going to sleep\n";
+                exit(0);
+            }
         }
 
         input = line; // Преобразуем char* в string
