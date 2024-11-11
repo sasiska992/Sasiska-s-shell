@@ -22,7 +22,29 @@ run: $(PATH_TO_PACKAGE)$(TARGET)
 clean:
 	rm -rf $(PATH_TO_PACKAGE)$(TARGET)
 
-create_package:
+create_package: $(PATH_TO_PACKAGE)$(TARGET)
 	dpkg-deb --build $(PACKAGE_NAME)
 	mkdir -p packages
 	mv $(PACKAGE_NAME).deb packages
+
+
+
+# Переменные для cronfs
+CRONFS_SRC = cronfs.cpp
+CRONFS_TARGET = cronfs
+CRONFS_PATH = $(PACKAGE_NAME)/usr/local/bin/
+
+
+# Правило для сборки cronfs
+$(CRONFS_PATH)$(CRONFS_TARGET): $(CRONFS_SRC)
+	mkdir -p $(CRONFS_PATH)
+	g++ -g $(CRONFS_SRC) -o $(CRONFS_PATH)$(CRONFS_TARGET) -lfuse
+
+
+# Правило для запуска cronfs
+run_cronfs: $(CRONFS_PATH)$(CRONFS_TARGET)
+	./$(CRONFS_PATH)$(CRONFS_TARGET)
+
+
+
+
