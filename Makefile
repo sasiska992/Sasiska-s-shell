@@ -36,14 +36,14 @@ CRONFS_PATH = $(PACKAGE_NAME)/usr/local/bin/
 
 
 # Правило для сборки cronfs
-$(CRONFS_PATH)$(CRONFS_TARGET): $(CRONFS_SRC)
+$(CRONFS_TARGET): $(CRONFS_SRC)
 	mkdir -p $(CRONFS_PATH)
 	g++ -g $(CRONFS_SRC) -o $(CRONFS_PATH)$(CRONFS_TARGET) -lfuse
 
 
 # Правило для запуска cronfs
-run_cronfs: $(CRONFS_PATH)$(CRONFS_TARGET)
-	./$(CRONFS_PATH)$(CRONFS_TARGET)
+run_cronfs: $(CRONFS_TARGET)
+	./$(CRONFS_TARGET) $(MOUNTPOINT)
 
 
 
